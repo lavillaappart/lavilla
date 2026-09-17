@@ -41,6 +41,7 @@ button, input { font: inherit; }
 .feature-card { background: var(--white); border: 1px solid var(--line); }
 .card-image { background: var(--sage); height: 270px; }
 .card-image { background-position: center; background-size: cover; background-repeat: no-repeat; }
+.card-image img { display: block; height: 100%; object-fit: cover; width: 100%; }
 .card-image.one { background: url('https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=900&q=80') center/cover; }
 .card-image.two { background: url('https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=900&q=80') center/cover; }
 .card-image.three { background: url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=80') center/cover; }

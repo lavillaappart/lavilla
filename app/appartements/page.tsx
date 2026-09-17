@@ -40,7 +40,13 @@ export default async function AppartementsPage() {
     throw new Error('Impossible de charger les appartements.');
   }
 
-  const apartments = (data ?? []) as Apartment[];
+  const apartments = (data ?? []).map((apartment) => {
+    const typedApartment = apartment as Apartment;
+    return {
+      ...typedApartment,
+      apartment_images: [...(typedApartment.apartment_images ?? [])].sort((a, b) => Number(b.is_primary) - Number(a.is_primary) || a.sort_order - b.sort_order)
+    };
+  });
 
   return (
     <main className="site-main">
@@ -53,7 +59,7 @@ export default async function AppartementsPage() {
 
             return (
               <article className="feature-card" key={apartment.id}>
-                <div className="card-image" style={apartment.apartment_images[0]?.storage_path ? { backgroundImage: `url("${apartment.apartment_images[0].storage_path}")` } : undefined} />
+                <div className="card-image">{apartment.apartment_images[0]?.storage_path ? <img src={apartment.apartment_images[0].storage_path} alt={translation?.name ?? apartment.slug} /> : null}</div>
                 <div className="card-body"><h2>{translation?.name ?? apartment.slug}</h2><p className="card-meta">{apartment.city} · {apartment.capacity} voyageurs · {apartment.bedrooms} chambres</p><p className="card-meta">{translation?.short_description}</p><div className="card-footer"><span className="price">{apartment.base_price} MAD / nuit</span><Link aria-label={`Voir ${translation?.name ?? apartment.slug}`} className="arrow-link" href={`/appartements/${apartment.slug}`}>↗</Link></div></div>
               </article>
             );
