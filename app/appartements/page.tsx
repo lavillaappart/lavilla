@@ -9,6 +9,8 @@ type Apartment = {
   bedrooms: number;
   bathrooms: number;
   base_price: number;
+  currency: string;
+  apartment_images: Array<{ storage_path: string; is_primary: boolean; sort_order: number }>;
   apartment_translations: Array<{
     locale: 'es' | 'fr' | 'en';
     name: string;
@@ -29,7 +31,7 @@ export default async function AppartementsPage() {
   const { data, error } = await supabase
     .from('apartments')
     .select(
-      'id, slug, city, capacity, bedrooms, bathrooms, base_price, apartment_translations(locale, name, short_description)'
+      'id, slug, city, capacity, bedrooms, bathrooms, base_price, currency, apartment_translations(locale, name, short_description), apartment_images(storage_path, is_primary, sort_order)'
     )
     .eq('status', 'active')
     .order('is_featured', { ascending: false });
@@ -51,8 +53,8 @@ export default async function AppartementsPage() {
 
             return (
               <article className="feature-card" key={apartment.id}>
-                <div className={`card-image ${['one', 'two', 'three'][apartments.indexOf(apartment) % 3]}`} />
-                <div className="card-body"><h2>{translation?.name ?? apartment.slug}</h2><p className="card-meta">{apartment.city} · {apartment.capacity} voyageurs · {apartment.bedrooms} chambres</p><p className="card-meta">{translation?.short_description}</p><div className="card-footer"><span className="price">{apartment.base_price} € / nuit</span><Link aria-label={`Voir ${translation?.name ?? apartment.slug}`} className="arrow-link" href={`/appartements/${apartment.slug}`}>↗</Link></div></div>
+                <div className="card-image" style={apartment.apartment_images[0]?.storage_path ? { backgroundImage: `url("${apartment.apartment_images[0].storage_path}")` } : undefined} />
+                <div className="card-body"><h2>{translation?.name ?? apartment.slug}</h2><p className="card-meta">{apartment.city} · {apartment.capacity} voyageurs · {apartment.bedrooms} chambres</p><p className="card-meta">{translation?.short_description}</p><div className="card-footer"><span className="price">{apartment.base_price} MAD / nuit</span><Link aria-label={`Voir ${translation?.name ?? apartment.slug}`} className="arrow-link" href={`/appartements/${apartment.slug}`}>↗</Link></div></div>
               </article>
             );
           })}
