@@ -1,0 +1,38 @@
+'use client';
+
+import { FormEvent, useState } from 'react';
+import { createClient } from '@/lib/supabase-client';
+
+type ApartmentData = { id: string; city: string; address: string; capacity: number; bedrooms: number; beds: number; bathrooms: number; surface_m2: number; base_price: number; min_stay_nights: number; max_stay_nights: number | null; check_in_time: string | null; check_out_time: string | null; translation: { name: string; short_description: string | null; description: string | null } | null; images: { id: string; storage_path: string; is_primary: boolean; sort_order: number }[] };
+
+export default function EditApartmentForm({ apartment }: { apartment: ApartmentData }) {
+  const translation = apartment.translation;
+  const [form, setForm] = useState({ name: translation?.name ?? '', shortDescription: translation?.short_description ?? '', description: translation?.description ?? '', city: apartment.city, address: apartment.address, capacity: String(apartment.capacity), bedrooms: String(apartment.bedrooms), beds: String(apartment.beds), bathrooms: String(apartment.bathrooms), surface: String(apartment.surface_m2 ?? ''), price: String(apartment.base_price), minStay: String(apartment.min_stay_nights), maxStay: apartment.max_stay_nights ? String(apartment.max_stay_nights) : '', checkIn: apartment.check_in_time ?? '15:00', checkOut: apartment.check_out_time ?? '11:00' });
+  const [newImages, setNewImages] = useState<File[]>([]);
+  const [coverId, setCoverId] = useState(apartment.images.find((image) => image.is_primary)?.id ?? '');
+  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const update = (field: keyof typeof form, value: string) => setForm((current) => ({ ...current, [field]: value }));
+
+  const submit = async (event: FormEvent) => {
+    event.preventDefault(); setLoading(true); setMessage('');
+    const supabase = createClient();
+    const slug = form.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const { error } = await supabase.from('apartments').update({ slug, city: form.city, address: form.address, capacity: Number(form.capacity), bedrooms: Number(form.bedrooms), beds: Number(form.beds), bathrooms: Number(form.bathrooms), surface_m2: Number(form.surface || 0), base_price: Number(form.price), min_stay_nights: Number(form.minStay), max_stay_nights: form.maxStay ? Number(form.maxStay) : null, check_in_time: form.checkIn, check_out_time: form.checkOut }).eq('id', apartment.id);
+    if (error) { setMessage(error.message); setLoading(false); return; }
+    const { error: translationError } = await supabase.from('apartment_translations').upsert({ apartment_id: apartment.id, locale: 'fr', name: form.name, short_description: form.shortDescription, description: form.description, location_text: form.city }, { onConflict: 'apartment_id,locale' });
+    if (translationError) { setMessage(translationError.message); setLoading(false); return; }
+    if (coverId) await supabase.from('apartment_images').update({ is_primary: false }).eq('apartment_id', apartment.id);
+    if (coverId) await supabase.from('apartment_images').update({ is_primary: true }).eq('id', coverId);
+    for (let index = 0; index < newImages.length; index += 1) {
+      const image = newImages[index]; const path = `${apartment.id}/${Date.now()}-${index}-${image.name.replace(/[^a-zA-Z0-9.-]/g, '-')}`;
+      const upload = await supabase.storage.from('apartment-images').upload(path, image, { contentType: image.type });
+      if (upload.error) { setMessage(upload.error.message); setLoading(false); return; }
+      const publicUrl = supabase.storage.from('apartment-images').getPublicUrl(path).data.publicUrl;
+      await supabase.from('apartment_images').insert({ apartment_id: apartment.id, storage_path: publicUrl, is_primary: !coverId && index === 0, sort_order: apartment.images.length + index, alt_text: form.name });
+    }
+    setMessage('Appartement modifié avec succès.'); setLoading(false); setNewImages([]); window.setTimeout(() => window.location.reload(), 700);
+  };
+
+  return <form className="apartment-form" onSubmit={submit}><section className="form-section"><div className="form-section-heading"><span>01</span><div><h2>Informations principales</h2><p>Modifiez les données visibles par les voyageurs.</p></div></div><div className="form-grid two"><label>Nom<input value={form.name} onChange={(event) => update('name', event.target.value)} required /></label><label>Ville<input value={form.city} onChange={(event) => update('city', event.target.value)} required /></label><label className="full">Adresse<input value={form.address} onChange={(event) => update('address', event.target.value)} required /></label><label className="full">Description courte<input value={form.shortDescription} onChange={(event) => update('shortDescription', event.target.value)} required /></label><label className="full">Description complète<textarea rows={5} value={form.description} onChange={(event) => update('description', event.target.value)} required /></label></div></section><section className="form-section"><div className="form-section-heading"><span>02</span><div><h2>Capacité et prix</h2><p>Actualisez les conditions du séjour.</p></div></div><div className="form-grid four"><label>Voyageurs<input type="number" min="1" value={form.capacity} onChange={(event) => update('capacity', event.target.value)} required /></label><label>Chambres<input type="number" min="0" value={form.bedrooms} onChange={(event) => update('bedrooms', event.target.value)} required /></label><label>Lits<input type="number" min="0" value={form.beds} onChange={(event) => update('beds', event.target.value)} required /></label><label>Bains<input type="number" min="0" value={form.bathrooms} onChange={(event) => update('bathrooms', event.target.value)} required /></label><label>Surface<input type="number" min="0" value={form.surface} onChange={(event) => update('surface', event.target.value)} /></label><label>Prix / nuit<input type="number" min="0" step="0.01" value={form.price} onChange={(event) => update('price', event.target.value)} required /></label><label>Minimum<input type="number" min="1" value={form.minStay} onChange={(event) => update('minStay', event.target.value)} required /></label><label>Maximum<input type="number" min="1" value={form.maxStay} onChange={(event) => update('maxStay', event.target.value)} /></label></div></section><section className="form-section"><div className="form-section-heading"><span>03</span><div><h2>Photos</h2><p>Choisissez une nouvelle couverture ou ajoutez des images.</p></div></div><div className="image-preview-grid">{apartment.images.map((image) => <label className={`image-preview ${coverId === image.id ? 'selected' : ''}`} key={image.id}><img src={image.storage_path} alt={form.name} /><span><input type="radio" name="cover" checked={coverId === image.id} onChange={() => setCoverId(image.id)} /> Couverture</span></label>)}</div><label className="upload-zone full">Ajouter des photos<input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={(event) => setNewImages(Array.from(event.target.files ?? []))} /><small>{newImages.length ? `${newImages.length} nouvelle(s) photo(s)` : 'Les photos ajoutées seront conservées dans la galerie.'}</small></label></section><div className="form-actions"><button className="auth-submit" disabled={loading} type="submit">{loading ? 'Enregistrement...' : 'Enregistrer les modifications'}</button>{message ? <p className="auth-message" role="status">{message}</p> : null}</div></form>;
+}
