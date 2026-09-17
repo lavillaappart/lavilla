@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { createServerComponentClient } from '@/lib/supabase-server';
+import Brand from '@/components/brand';
 
 type Apartment = {
   id: string;
@@ -50,7 +51,7 @@ export default async function AppartementsPage() {
 
   return (
     <main className="site-main">
-      <header className="listing-header"><div className="shell"><nav className="nav"><Link className="brand" href="/"><span className="brand-mark" /> La Villa</Link><div className="nav-links"><Link className="nav-cta" href="/">Retour à l&apos;accueil</Link></div></nav><p className="eyebrow">Nos adresses</p><h1>Choisissez votre prochain chez-vous.</h1><p>Des espaces singuliers pour vivre Valencia à votre rythme.</p></div></header>
+      <header className="listing-header"><div className="shell"><nav className="nav"><Brand /><div className="nav-links"><Link className="nav-cta" href="/">Retour à l&apos;accueil</Link></div></nav><p className="eyebrow">Nos adresses</p><h1>Choisissez votre prochain chez-vous.</h1><p>Des espaces singuliers pour vivre Valencia à votre rythme.</p></div></header>
 
       {apartments.length === 0 ? <section className="shell listing-grid"><p className="empty-state">Aucun appartement disponible pour le moment.</p></section> : (
         <section className="shell listing-grid" aria-label="Liste des appartements">

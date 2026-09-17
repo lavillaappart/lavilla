@@ -16,7 +16,10 @@ button, input { font: inherit; }
 .session-button { background: var(--forest); border: 1px solid var(--forest); color: #fff; cursor: pointer; }
 .session-button:disabled { cursor: wait; opacity: .65; }
 .session-register { background: var(--coral); border-color: var(--coral); }
-.brand { align-items: center; display: flex; gap: 10px; font-weight: 700; letter-spacing: -.03em; }
+.brand { align-items: center; display: inline-flex; gap: 10px; font-weight: 700; letter-spacing: -.03em; }
+.brand-logo-frame { display: inline-flex; align-items: center; justify-content: center; line-height: 0; width: clamp(136px, 15vw, 240px); }
+.brand-logo-frame img { display: block; height: auto; width: 100%; object-fit: contain; filter: drop-shadow(0 8px 22px rgba(21, 38, 36, .12)); }
+.brand-admin .brand-logo-frame { width: clamp(120px, 13vw, 210px); }
 .brand-mark { background: var(--coral); border-radius: 50%; display: inline-block; height: 12px; width: 12px; }
 .nav-links { align-items: center; display: flex; gap: 30px; color: var(--muted); font-size: 14px; }
 .nav-links a:hover { color: var(--ink); }

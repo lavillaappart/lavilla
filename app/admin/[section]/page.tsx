@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 import { createServerComponentClient } from '@/lib/supabase-server';
 import SessionControls from '@/components/session-controls';
 import RequestActions from '@/components/request-actions';
+import Brand from '@/components/brand';
 
 const sections = {
   solicitudes: { title: 'Demandes de réservation', eyebrow: 'Demandes', description: 'Traitez les demandes reçues et contactez les voyageurs.', table: 'reservation_requests' },
@@ -44,7 +45,7 @@ export default async function AdminSectionPage({ params }: { params: { section: 
 
   return (
     <main className="dashboard-page">
-      <nav className="dashboard-nav"><Link className="brand" href="/admin"><span className="brand-mark" /> La Villa · Admin</Link><div><Link href="/admin">Dashboard</Link><SessionControls isAuthenticated isAdmin /></div></nav>
+      <nav className="dashboard-nav"><Brand href="/admin" admin /><div><Link href="/admin">Dashboard</Link><SessionControls isAuthenticated isAdmin /></div></nav>
       <header className="dashboard-header admin-page-header"><div><p className="eyebrow">{section.eyebrow} · {role?.slug}</p><h1>{section.title}</h1><p>{section.description}</p></div><Link className="admin-back-link" href="/admin">← Dashboard</Link></header>
       {error ? <p className="dashboard-empty">Erreur Supabase: {error.message}</p> : rows.length === 0 ? <p className="dashboard-empty">Aucun élément à afficher pour le moment.</p> : <section className="admin-data-list">{rows.map((row, index) => <article className="admin-data-row" key={String(row.id ?? index)}><div><strong>{getPrimaryLabel(params.section, row)}</strong><small>{getSecondaryLabel(params.section, row)}</small></div><span>{getStatus(row)}</span><b>{getAmount(row)}</b>{params.section === 'solicitudes' ? <RequestActions requestId={String(row.id)} status={String(row.status ?? '')} /> : null}</article>)}</section>}
     </main>

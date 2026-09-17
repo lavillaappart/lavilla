@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createServerComponentClient } from '@/lib/supabase-server';
+import Brand from '@/components/brand';
 
 type Translation = {
   locale: 'es' | 'fr' | 'en';
@@ -41,7 +42,7 @@ export default async function AppartementPage({ params }: { params: { slug: stri
 
   return (
     <main className="apartment-public-page">
-      <div className="shell public-detail-shell"><nav className="public-detail-nav"><Link className="brand" href="/"><span className="brand-mark" /> La Villa</Link><Link className="text-link" href="/appartements">← Tous les appartements</Link></nav>
+      <div className="shell public-detail-shell"><nav className="public-detail-nav"><Brand /><Link className="text-link" href="/appartements">← Tous les appartements</Link></nav>
       <article className="apartment-public-detail">
         <div className="public-gallery">{images.length ? images.map((image, index) => <img className={index === 0 ? 'public-gallery-cover' : ''} key={image.storage_path} src={image.storage_path} alt={image.alt_text ?? translation?.name ?? apartment.slug} />) : <div className="public-image-placeholder">Photos bientôt disponibles</div>}</div>
         <div className="public-detail-copy">

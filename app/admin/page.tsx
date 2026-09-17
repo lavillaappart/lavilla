@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createServerComponentClient } from '@/lib/supabase-server';
 import SessionControls from '@/components/session-controls';
+import Brand from '@/components/brand';
 
 export default async function AdminPage() {
   const supabase = createServerComponentClient();
@@ -51,7 +52,7 @@ export default async function AdminPage() {
 
   return (
     <main className="dashboard-page">
-      <nav className="dashboard-nav"><Link className="brand" href="/"><span className="brand-mark" /> La Villa · Admin</Link><div><SessionControls isAuthenticated isAdmin /></div></nav>
+      <nav className="dashboard-nav"><Brand href="/admin" admin /><div><SessionControls isAuthenticated isAdmin /></div></nav>
       <header className="dashboard-header dashboard-header-compact"><div><p className="eyebrow">Espace administration · {role}</p><h1>Tableau de bord</h1><p>Vue opérationnelle des locations, réservations et paiements.</p></div><time dateTime={todayValue}>{today.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</time></header>
       <section className="dashboard-grid">
         <DashboardCard label="Demandes en attente" value={pendingRequests.count ?? 0} href="/admin/solicitudes" />
