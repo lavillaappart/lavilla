@@ -51,7 +51,7 @@ export default async function AdminPage() {
 
   return (
     <main className="dashboard-page">
-      <nav className="dashboard-nav"><Link className="brand" href="/"><span className="brand-mark" /> La Villa · Admin</Link><div><SessionControls isAuthenticated /></div></nav>
+      <nav className="dashboard-nav"><Link className="brand" href="/"><span className="brand-mark" /> La Villa · Admin</Link><div><SessionControls isAuthenticated isAdmin /></div></nav>
       <header className="dashboard-header"><p className="eyebrow">Espace administration · {role}</p><h1>Bonjour, votre journée en un coup d&apos;œil.</h1><p>Suivez les demandes, les arrivées, les départs et les paiements depuis un seul espace.</p></header>
       <section className="dashboard-grid">
         <DashboardCard label="Demandes en attente" value={pendingRequests.count ?? 0} href="/admin/solicitudes" />

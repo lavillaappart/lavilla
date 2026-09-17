@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase-client';
 
-export default function SessionControls({ isAuthenticated }: { isAuthenticated: boolean }) {
+export default function SessionControls({ isAuthenticated, isAdmin = false }: { isAuthenticated: boolean; isAdmin?: boolean }) {
   const [loading, setLoading] = useState(false);
 
   const handleSignOut = async () => {
@@ -17,7 +17,7 @@ export default function SessionControls({ isAuthenticated }: { isAuthenticated: 
   if (isAuthenticated) {
     return (
       <div className="session-controls">
-        <Link className="session-link" href="/compte"><span aria-hidden="true">◉</span> Mon compte</Link>
+        <Link className="session-link" href={isAdmin ? '/admin' : '/compte'}><span aria-hidden="true">◉</span> {isAdmin ? 'Administration' : 'Mon compte'}</Link>
         <button className="session-button" disabled={loading} onClick={handleSignOut} type="button">
           {loading ? 'Déconnexion...' : 'Se déconnecter'}
         </button>
