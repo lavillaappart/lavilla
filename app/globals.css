@@ -190,6 +190,12 @@ button, input { font: inherit; }
 .admin-data-row small { color: var(--muted); font-size: 12px; margin-top: 6px; }
 .admin-data-row span { color: var(--coral); font-size: 11px; font-weight: 700; text-transform: capitalize; }
 .admin-data-row b { color: var(--forest); font-size: 13px; }
+.request-actions { display: flex; flex-wrap: wrap; gap: 7px; grid-column: 1 / -1; }
+.request-actions button { background: var(--sage); border: 1px solid var(--line); color: var(--forest); cursor: pointer; font-size: 11px; font-weight: 700; padding: 9px 11px; }
+.request-actions button:hover { border-color: var(--forest); }
+.request-actions button.danger { background: #f7e1da; color: #9b3e28; }
+.request-actions button:disabled { cursor: wait; opacity: .55; }
+.request-actions small { color: #9b3e28; font-size: 11px; }
 .table-actions { align-items: center; display: flex; gap: 10px; justify-content: flex-end; }
 .table-action { background: transparent; border: 0; color: var(--forest); cursor: pointer; font-size: 12px; font-weight: 700; padding: 0; }
 .table-action:hover { color: var(--coral); }
