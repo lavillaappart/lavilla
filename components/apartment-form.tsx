@@ -1,12 +1,14 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-client';
 
 const initialForm = { name: '', shortDescription: '', description: '', city: '', address: '', capacity: '2', bedrooms: '1', beds: '1', bathrooms: '1', surface: '', price: '', minStay: '2', maxStay: '', checkIn: '15:00', checkOut: '11:00' };
 const fileKey = (file: File) => `${file.name}-${file.size}-${file.lastModified}`;
 
 export default function ApartmentForm() {
+  const router = useRouter();
   const [form, setForm] = useState(initialForm);
   const [cover, setCover] = useState<File | null>(null);
   const [gallery, setGallery] = useState<File[]>([]);
@@ -46,7 +48,8 @@ export default function ApartmentForm() {
     try {
       await uploadImage(supabase, apartment.id, cover, true, 0);
       for (let index = 0; index < gallery.length; index += 1) await uploadImage(supabase, apartment.id, gallery[index], false, index + 1);
-      setForm(initialForm); setCover(null); setGallery([]); setMessage('Appartement créé avec succès.');
+      router.push('/admin/apartamentos');
+      router.refresh();
     } catch (uploadError) { setMessage(uploadError instanceof Error ? uploadError.message : 'Impossible d’envoyer les photos.'); }
     setLoading(false);
   };
