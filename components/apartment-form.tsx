@@ -86,6 +86,7 @@ export default function ApartmentForm() {
       const { data: publicUrl } = supabase.storage.from('apartment-images').getPublicUrl(path);
       const { error: imageError } = await supabase.from('apartment_images').insert({ apartment_id: apartment.id, storage_path: publicUrl.publicUrl, is_primary: index === coverIndex, sort_order: index, alt_text: form.name });
       if (imageError) {
+        await supabase.storage.from('apartment-images').remove([path]);
         setMessage(imageError.message);
         setLoading(false);
         return;
