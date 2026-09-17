@@ -41,35 +41,24 @@ export default async function AppartementsPage() {
   const apartments = (data ?? []) as Apartment[];
 
   return (
-    <main>
-      <header>
-        <p>La Villa</p>
-        <h1>Nos appartements</h1>
-        <p>Découvrez des logements confortables pour votre prochain séjour.</p>
-      </header>
+    <main className="site-main">
+      <header className="listing-header"><div className="shell"><nav className="nav"><Link className="brand" href="/"><span className="brand-mark" /> La Villa</Link><div className="nav-links"><Link className="nav-cta" href="/">Retour à l&apos;accueil</Link></div></nav><p className="eyebrow">Nos adresses</p><h1>Choisissez votre prochain chez-vous.</h1><p>Des espaces singuliers pour vivre Valencia à votre rythme.</p></div></header>
 
-      {apartments.length === 0 ? (
-        <p>Aucun appartement disponible pour le moment.</p>
-      ) : (
-        <section aria-label="Liste des appartements">
+      {apartments.length === 0 ? <section className="shell listing-grid"><p className="empty-state">Aucun appartement disponible pour le moment.</p></section> : (
+        <section className="shell listing-grid" aria-label="Liste des appartements">
           {apartments.map((apartment) => {
             const translation = getTranslation(apartment);
 
             return (
-              <article key={apartment.id}>
-                <h2>{translation?.name ?? apartment.slug}</h2>
-                <p>{translation?.short_description}</p>
-                <p>
-                  {apartment.city} · {apartment.capacity} voyageurs · {apartment.bedrooms} chambres ·{' '}
-                  {apartment.bathrooms} salles de bain
-                </p>
-                <p>{apartment.base_price} EUR / nuit</p>
-                <Link href={`/appartements/${apartment.slug}`}>Voir l'appartement</Link>
+              <article className="feature-card" key={apartment.id}>
+                <div className={`card-image ${['one', 'two', 'three'][apartments.indexOf(apartment) % 3]}`} />
+                <div className="card-body"><h2>{translation?.name ?? apartment.slug}</h2><p className="card-meta">{apartment.city} · {apartment.capacity} voyageurs · {apartment.bedrooms} chambres</p><p className="card-meta">{translation?.short_description}</p><div className="card-footer"><span className="price">{apartment.base_price} € / nuit</span><Link aria-label={`Voir ${translation?.name ?? apartment.slug}`} className="arrow-link" href={`/appartements/${apartment.slug}`}>↗</Link></div></div>
               </article>
             );
           })}
         </section>
       )}
+      <footer className="footer"><div className="shell footer-inner"><span>© 2026 La Villa</span><Link href="/">Accueil ↗</Link></div></footer>
     </main>
   );
 }
