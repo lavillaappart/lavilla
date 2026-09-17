@@ -41,15 +41,15 @@ export default async function AppartementPage({ params }: { params: { slug: stri
 
   return (
     <main className="apartment-public-page">
-      <div className="shell public-detail-shell"><Link className="text-link" href="/appartements">← Retour aux appartements</Link>
+      <div className="shell public-detail-shell"><nav className="public-detail-nav"><Link className="brand" href="/"><span className="brand-mark" /> La Villa</Link><Link className="text-link" href="/appartements">← Tous les appartements</Link></nav>
       <article className="apartment-public-detail">
-        <div className="public-gallery">{images.length ? images.map((image) => <img key={image.storage_path} src={image.storage_path} alt={image.alt_text ?? translation?.name ?? apartment.slug} />) : <div className="public-image-placeholder">Photos bientôt disponibles</div>}</div>
+        <div className="public-gallery">{images.length ? images.map((image, index) => <img className={index === 0 ? 'public-gallery-cover' : ''} key={image.storage_path} src={image.storage_path} alt={image.alt_text ?? translation?.name ?? apartment.slug} />) : <div className="public-image-placeholder">Photos bientôt disponibles</div>}</div>
         <div className="public-detail-copy">
-        <p>{apartment.city}</p>
+        <div className="public-kicker"><span className="eyebrow">La Villa · {apartment.city}</span><span className="availability-dot">Disponible</span></div>
         <h1>{translation?.name ?? apartment.slug}</h1>
-        <p>{translation?.description ?? translation?.short_description}</p>
-        <p>{translation?.location_text ?? apartment.address}</p>
-        <dl>
+        <p className="public-lead">{translation?.description ?? translation?.short_description}</p>
+        <p className="public-address">{translation?.location_text ?? apartment.address}</p>
+        <dl className="public-facts">
           <div>
             <dt>Voyageurs</dt>
             <dd>{apartment.capacity}</dd>
@@ -67,12 +67,9 @@ export default async function AppartementPage({ params }: { params: { slug: stri
             <dd>{apartment.bathrooms}</dd>
           </div>
         </dl>
-        <p>
-          {apartment.base_price} MAD / nuit
-        </p>
-        <p>
-          Arrivée à partir de {apartment.check_in_time ?? '15:00'} · Départ avant {apartment.check_out_time ?? '11:00'}
-        </p>
+        <div className="public-price"><span>À partir de</span><strong>{apartment.base_price} MAD</strong><small>par nuit · séjour minimum selon disponibilité</small></div>
+        <Link className="public-booking-cta" href="/registro">Demander ce séjour <span>↗</span></Link>
+        <p className="public-hours">Arrivée à partir de {apartment.check_in_time ?? '15:00'} · Départ avant {apartment.check_out_time ?? '11:00'}</p>
         </div>
       </article></div>
     </main>
