@@ -8,6 +8,7 @@ const initialForm = { name: '', shortDescription: '', description: '', city: '',
 export default function ApartmentForm() {
   const [form, setForm] = useState(initialForm);
   const [images, setImages] = useState<File[]>([]);
+  const [coverIndex, setCoverIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -66,12 +67,15 @@ export default function ApartmentForm() {
       const path = `${apartment.id}/${Date.now()}-${index}-${image.name.replace(/[^a-zA-Z0-9.-]/g, '-')}`;
       const { error: uploadError } = await supabase.storage.from('apartment-images').upload(path, image, { upsert: false, contentType: image.type });
       if (uploadError) {
-        setMessage(`Appartement créé, mais une photo n’a pas pu être envoyée : ${uploadError.message}`);
+        const message = uploadError.message === 'Bucket not found'
+          ? 'Le stockage des photos n’est pas encore configuré. Exécutez la migration 004 dans Supabase.'
+          : `Appartement créé, mais une photo n’a pas pu être envoyée : ${uploadError.message}`;
+        setMessage(message);
         setLoading(false);
         return;
       }
       const { data: publicUrl } = supabase.storage.from('apartment-images').getPublicUrl(path);
-      const { error: imageError } = await supabase.from('apartment_images').insert({ apartment_id: apartment.id, storage_path: publicUrl.publicUrl, is_primary: index === 0, sort_order: index, alt_text: form.name });
+      const { error: imageError } = await supabase.from('apartment_images').insert({ apartment_id: apartment.id, storage_path: publicUrl.publicUrl, is_primary: index === coverIndex, sort_order: index, alt_text: form.name });
       if (imageError) {
         setMessage(imageError.message);
         setLoading(false);
@@ -81,6 +85,7 @@ export default function ApartmentForm() {
 
     setForm(initialForm);
     setImages([]);
+    setCoverIndex(0);
     setMessage('Appartement créé avec succès.');
     setLoading(false);
   };
@@ -89,7 +94,7 @@ export default function ApartmentForm() {
     <form className="apartment-form" onSubmit={handleSubmit}>
       <section className="form-section"><div className="form-section-heading"><span>01</span><div><h2>Informations principales</h2><p>Le nom et le contenu visible par les voyageurs.</p></div></div><div className="form-grid two"><label>Nom de l’appartement<input value={form.name} onChange={(event) => update('name', event.target.value)} required /></label><label>Ville<input value={form.city} onChange={(event) => update('city', event.target.value)} required /></label><label className="full">Adresse<input value={form.address} onChange={(event) => update('address', event.target.value)} required /></label><label className="full">Description courte<input value={form.shortDescription} onChange={(event) => update('shortDescription', event.target.value)} required /></label><label className="full">Description complète<textarea value={form.description} onChange={(event) => update('description', event.target.value)} rows={5} required /></label></div></section>
       <section className="form-section"><div className="form-section-heading"><span>02</span><div><h2>Capacité et prix</h2><p>Ces données servent à filtrer les disponibilités.</p></div></div><div className="form-grid four"><label>Voyageurs<input type="number" min="1" value={form.capacity} onChange={(event) => update('capacity', event.target.value)} required /></label><label>Chambres<input type="number" min="0" value={form.bedrooms} onChange={(event) => update('bedrooms', event.target.value)} required /></label><label>Lits<input type="number" min="0" value={form.beds} onChange={(event) => update('beds', event.target.value)} required /></label><label>Salles de bain<input type="number" min="0" value={form.bathrooms} onChange={(event) => update('bathrooms', event.target.value)} required /></label><label>Surface m²<input type="number" min="0" value={form.surface} onChange={(event) => update('surface', event.target.value)} /></label><label>Prix / nuit (€)<input type="number" min="0" step="0.01" value={form.price} onChange={(event) => update('price', event.target.value)} required /></label><label>Séjour minimum<input type="number" min="1" value={form.minStay} onChange={(event) => update('minStay', event.target.value)} required /></label><label>Séjour maximum<input type="number" min="1" value={form.maxStay} onChange={(event) => update('maxStay', event.target.value)} /></label></div></section>
-      <section className="form-section"><div className="form-section-heading"><span>03</span><div><h2>Horaires et photos</h2><p>Ajoutez les images depuis votre ordinateur. La première sera la couverture.</p></div></div><div className="form-grid two"><label>Heure d’arrivée<input type="time" value={form.checkIn} onChange={(event) => update('checkIn', event.target.value)} required /></label><label>Heure de départ<input type="time" value={form.checkOut} onChange={(event) => update('checkOut', event.target.value)} required /></label><label className="upload-zone full">Photos de l’appartement<input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={(event) => setImages(Array.from(event.target.files ?? []))} /><small>{images.length ? `${images.length} photo(s) sélectionnée(s)` : 'JPG, PNG ou WebP · plusieurs fichiers possibles'}</small></label></div></section>
+      <section className="form-section"><div className="form-section-heading"><span>03</span><div><h2>Horaires et photos</h2><p>Choisissez une photo de couverture. Les autres seront visibles dans la galerie.</p></div></div><div className="form-grid two"><label>Heure d’arrivée<input type="time" value={form.checkIn} onChange={(event) => update('checkIn', event.target.value)} required /></label><label>Heure de départ<input type="time" value={form.checkOut} onChange={(event) => update('checkOut', event.target.value)} required /></label><label className="upload-zone full">Photos de l’appartement<input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={(event) => { setImages(Array.from(event.target.files ?? [])); setCoverIndex(0); }} /><small>{images.length ? `${images.length} photo(s) sélectionnée(s)` : 'JPG, PNG ou WebP · plusieurs fichiers possibles'}</small></label>{images.length ? <div className="image-selection full"><p className="image-selection-label">Photo de couverture</p><div className="image-preview-grid">{images.map((image, index) => <label className={`image-preview ${index === coverIndex ? 'selected' : ''}`} key={`${image.name}-${index}`}><img src={URL.createObjectURL(image)} alt={image.name} /><span><input type="radio" name="cover-image" checked={index === coverIndex} onChange={() => setCoverIndex(index)} /> {index === coverIndex ? 'Couverture' : 'Galerie'}</span></label>)}</div></div> : null}</div></section>
       <div className="form-actions"><button className="auth-submit" disabled={loading} type="submit">{loading ? 'Création en cours...' : 'Créer l’appartement'}</button>{message ? <p className="auth-message" role="status">{message}</p> : null}</div>
     </form>
   );
