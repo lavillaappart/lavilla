@@ -16,7 +16,15 @@ export default function DeleteApartmentButton({ apartmentId, imagePaths }: { apa
     if (paths.length) await supabase.storage.from('apartment-images').remove(paths);
     const { error } = await supabase.from('apartments').delete().eq('id', apartmentId);
     if (error) {
-      setMessage(error.message.includes('violates foreign key') ? 'Impossible de supprimer un appartement avec des réservations liées.' : error.message);
+      if (error.message.includes('violates foreign key')) {
+        const { error: archiveError } = await supabase.from('apartments').update({ status: 'inactive', is_featured: false }).eq('id', apartmentId);
+        if (!archiveError) {
+          setMessage('Appartement désactivé : son historique est conservé et il n’apparaît plus sur le site.');
+          setLoading(false);
+          return;
+        }
+      }
+      setMessage(error.message);
       setLoading(false);
       return;
     }
