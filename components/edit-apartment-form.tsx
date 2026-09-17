@@ -31,12 +31,20 @@ export default function EditApartmentForm({ apartment }: { apartment: ApartmentD
     const supabase = createClient();
     const slug = form.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     const updateResult = await supabase.from('apartments').update({ slug, city: form.city, address: form.address, capacity: Number(form.capacity), bedrooms: Number(form.bedrooms), beds: Number(form.beds), bathrooms: Number(form.bathrooms), surface_m2: Number(form.surface || 0), base_price: Number(form.price), min_stay_nights: Number(form.minStay), max_stay_nights: form.maxStay ? Number(form.maxStay) : null, check_in_time: form.checkIn, check_out_time: form.checkOut }).eq('id', apartment.id);
-    if (updateResult.error) { setMessage(updateResult.error.message); setLoading(false); return; }
+    if (updateResult.error) { setMessage(`Données de l’appartement : ${updateResult.error.message}`); setLoading(false); return; }
     const translation = await supabase.from('apartment_translations').upsert({ apartment_id: apartment.id, locale: 'fr', name: form.name, short_description: form.shortDescription, description: form.description, location_text: form.city }, { onConflict: 'apartment_id,locale' });
-    if (translation.error) { setMessage(translation.error.message); setLoading(false); return; }
+    if (translation.error) { setMessage(`Traduction : ${translation.error.message}`); setLoading(false); return; }
     try {
-      if (newCover) { await supabase.from('apartment_images').update({ is_primary: false }).eq('apartment_id', apartment.id); await upload(supabase, newCover, true, 0); }
-      else if (coverId) { const reset = await supabase.from('apartment_images').update({ is_primary: false }).eq('apartment_id', apartment.id); if (reset.error) throw new Error(reset.error.message); const setCover = await supabase.from('apartment_images').update({ is_primary: true }).eq('id', coverId); if (setCover.error) throw new Error(setCover.error.message); }
+      if (newCover) {
+        const reset = await supabase.from('apartment_images').update({ is_primary: false }).eq('apartment_id', apartment.id);
+        if (reset.error) throw new Error(`Réinitialisation de la couverture : ${reset.error.message}`);
+        await upload(supabase, newCover, true, 0);
+      } else if (coverId) {
+        const reset = await supabase.from('apartment_images').update({ is_primary: false }).eq('apartment_id', apartment.id);
+        if (reset.error) throw new Error(`Réinitialisation de la couverture : ${reset.error.message}`);
+        const setCover = await supabase.from('apartment_images').update({ is_primary: true }).eq('id', coverId);
+        if (setCover.error) throw new Error(`Nouvelle couverture : ${setCover.error.message}`);
+      }
       const existingCount = apartment.images.length + (newCover ? 1 : 0);
       if (existingCount + gallery.length > 10) throw new Error('Un appartement peut contenir au maximum 10 photos.');
       for (let index = 0; index < gallery.length; index += 1) await upload(supabase, gallery[index], false, existingCount + index);
