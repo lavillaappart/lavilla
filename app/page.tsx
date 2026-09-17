@@ -9,7 +9,6 @@ export default async function HomePage() {
     .from('apartments')
     .select('id, slug, city, capacity, bedrooms, base_price, currency, apartment_translations(locale, name, short_description), apartment_images(storage_path, is_primary, sort_order)')
     .eq('status', 'active')
-    .eq('is_featured', true)
     .order('created_at', { ascending: false })
     .limit(3);
   const { data: profile } = sessionData.session
