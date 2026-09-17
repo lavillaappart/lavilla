@@ -3,12 +3,12 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'WebAnas',
-  description: 'Plataforma de alquiler de apartamentos'
+  description: 'Plateforme de location d\'appartements'
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es">
+    <html lang={process.env.NEXT_PUBLIC_DEFAULT_LOCALE ?? 'fr'}>
       <body>{children}</body>
     </html>
   );
