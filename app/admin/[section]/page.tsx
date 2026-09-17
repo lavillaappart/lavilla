@@ -32,7 +32,7 @@ export default async function AdminSectionPage({ params }: { params: { section: 
   const nextWeekDate = new Date();
   nextWeekDate.setDate(nextWeekDate.getDate() + 7);
   const nextWeek = nextWeekDate.toISOString().slice(0, 10);
-  let query = supabase.from(section.table).select('*').order('created_at', { ascending: false }).limit(50);
+  let query = supabase.from(section.table).select('*').order(params.section === 'ajustes' ? 'updated_at' : 'created_at', { ascending: false }).limit(50);
 
   if (params.section === 'llegadas') query = supabase.from('reservations').select('*').eq('status', 'confirmed').gte('check_in', today).lte('check_in', nextWeek).order('check_in');
   if (params.section === 'salidas') query = supabase.from('reservations').select('*').eq('status', 'confirmed').gte('check_out', today).lte('check_out', nextWeek).order('check_out');
@@ -46,7 +46,7 @@ export default async function AdminSectionPage({ params }: { params: { section: 
     <main className="dashboard-page">
       <nav className="dashboard-nav"><Link className="brand" href="/admin"><span className="brand-mark" /> La Villa · Admin</Link><div><Link href="/admin">Dashboard</Link><SessionControls isAuthenticated isAdmin /></div></nav>
       <header className="dashboard-header admin-page-header"><div><p className="eyebrow">{section.eyebrow} · {role?.slug}</p><h1>{section.title}</h1><p>{section.description}</p></div><Link className="admin-back-link" href="/admin">← Dashboard</Link></header>
-      {error ? <p className="dashboard-empty">Impossible de charger ces données. Exécutez la migration 009_admin_dashboard_rls.sql dans Supabase.</p> : rows.length === 0 ? <p className="dashboard-empty">Aucun élément à afficher pour le moment.</p> : <section className="admin-data-list">{rows.map((row, index) => <article className="admin-data-row" key={String(row.id ?? index)}><div><strong>{getPrimaryLabel(params.section, row)}</strong><small>{getSecondaryLabel(params.section, row)}</small></div><span>{getStatus(row)}</span><b>{getAmount(row)}</b>{params.section === 'solicitudes' ? <RequestActions requestId={String(row.id)} status={String(row.status ?? '')} /> : null}</article>)}</section>}
+      {error ? <p className="dashboard-empty">Erreur Supabase: {error.message}</p> : rows.length === 0 ? <p className="dashboard-empty">Aucun élément à afficher pour le moment.</p> : <section className="admin-data-list">{rows.map((row, index) => <article className="admin-data-row" key={String(row.id ?? index)}><div><strong>{getPrimaryLabel(params.section, row)}</strong><small>{getSecondaryLabel(params.section, row)}</small></div><span>{getStatus(row)}</span><b>{getAmount(row)}</b>{params.section === 'solicitudes' ? <RequestActions requestId={String(row.id)} status={String(row.status ?? '')} /> : null}</article>)}</section>}
     </main>
   );
 }
