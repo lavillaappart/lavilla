@@ -97,11 +97,24 @@ button, input { font: inherit; }
 .dashboard-header { border-bottom: 1px solid var(--line); padding: 75px 0 55px; }
 .dashboard-header h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.7rem, 6vw, 5.4rem); font-weight: 500; letter-spacing: -.06em; line-height: 1; margin: 0 0 20px; max-width: 800px; }
 .dashboard-header p:last-child { color: var(--muted); line-height: 1.6; }
-.dashboard-grid { display: grid; gap: 18px; grid-template-columns: repeat(3, 1fr); padding: 34px 0; }
-.dashboard-grid article { background: var(--white); border: 1px solid var(--line); display: grid; gap: 18px; padding: 24px; }
-.dashboard-grid span { color: var(--muted); font-size: 13px; }
-.dashboard-grid strong { font-family: 'Playfair Display', serif; font-size: 48px; font-weight: 500; }
+.dashboard-grid { display: grid; gap: 18px; grid-template-columns: repeat(3, 1fr); padding: 34px 0 55px; }
+.dashboard-card { background: var(--white); border: 1px solid var(--line); display: grid; gap: 18px; padding: 24px; }
+.dashboard-card:hover, .admin-tool:hover { border-color: var(--coral); transform: translateY(-2px); }
+.dashboard-card span { color: var(--muted); font-size: 13px; }
+.dashboard-card strong { font-family: 'Playfair Display', serif; font-size: 48px; font-weight: 500; }
+.dashboard-card small { color: var(--forest); font-size: 12px; font-weight: 700; }
 .dashboard-grid a, .dashboard-action { color: var(--forest); font-size: 13px; font-weight: 700; }
+.admin-tools { border-top: 1px solid var(--line); padding: 55px 0 90px; }
+.admin-section-heading { align-items: flex-end; display: flex; justify-content: space-between; margin-bottom: 25px; }
+.admin-section-heading h2 { font-family: 'Playfair Display', serif; font-size: 38px; font-weight: 500; letter-spacing: -.04em; margin: 0; }
+.admin-section-heading > a { color: var(--forest); font-size: 13px; font-weight: 700; }
+.tool-grid { display: grid; gap: 10px; grid-template-columns: repeat(3, 1fr); }
+.admin-tool { align-items: center; background: var(--white); border: 1px solid var(--line); display: grid; gap: 15px; grid-template-columns: auto 1fr auto; padding: 20px; transition: transform .2s, border-color .2s; }
+.tool-icon { align-items: center; background: var(--sage); border-radius: 50%; color: var(--forest); display: inline-flex; font-size: 18px; height: 40px; justify-content: center; width: 40px; }
+.admin-tool strong, .admin-tool small { display: block; }
+.admin-tool strong { font-size: 14px; }
+.admin-tool small { color: var(--muted); font-size: 11px; line-height: 1.4; margin-top: 5px; }
+.admin-tool b { color: var(--forest); font-size: 17px; }
 .dashboard-content, .dashboard-empty { background: var(--white); border: 1px solid var(--line); margin-bottom: 80px; padding: 30px; }
 .dashboard-content h2, .dashboard-empty h2 { font-family: 'Playfair Display', serif; font-size: 30px; font-weight: 500; margin: 0 0 10px; }
 .dashboard-content p, .dashboard-empty p { color: var(--muted); line-height: 1.6; }
@@ -110,7 +123,7 @@ button, input { font: inherit; }
 .reservation-row h2 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 500; margin: 5px 0 0; }
 .reservation-row p { color: var(--muted); font-size: 14px; }
 .reservation-row .eyebrow { color: var(--coral); font-size: 10px; margin: 0; }
-@media (max-width: 760px) { .footer-links { align-items: start; flex-direction: column; gap: 8px; } .dashboard-nav div { gap: 8px; } .dashboard-nav a { margin-left: 8px; } .dashboard-header { padding-top: 50px; } .dashboard-grid, .reservation-row { grid-template-columns: 1fr; } }
+@media (max-width: 760px) { .footer-links { align-items: start; flex-direction: column; gap: 8px; } .dashboard-nav div { gap: 8px; } .dashboard-nav a { margin-left: 8px; } .dashboard-header { padding-top: 50px; } .dashboard-grid, .tool-grid, .reservation-row { grid-template-columns: 1fr; } .admin-section-heading { align-items: start; display: block; } .admin-section-heading > a { display: inline-block; margin-top: 15px; } }
 @media (max-width: 760px) { .auth-page { display: block; } .auth-visual { min-height: 390px; padding: 25px; } .auth-panel { padding: 35px 20px 55px; } .auth-heading { margin-top: 50px; } .auth-grid { grid-template-columns: 1fr; } }
 @media (max-width: 760px) {
   .shell { width: min(100% - 28px, 560px); }
