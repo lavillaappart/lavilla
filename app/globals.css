@@ -94,6 +94,7 @@ button, input { font: inherit; }
 .dashboard-nav { align-items: center; display: flex; justify-content: space-between; padding: 24px 0; }
 .dashboard-nav a { color: var(--muted); font-size: 14px; margin-left: 22px; }
 .dashboard-nav .brand { color: var(--ink); margin-left: 0; }
+.dashboard-nav .brand-mark { background: var(--forest); }
 .dashboard-header { border-bottom: 1px solid var(--line); padding: 75px 0 55px; }
 .dashboard-header h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.7rem, 6vw, 5.4rem); font-weight: 500; letter-spacing: -.06em; line-height: 1; margin: 0 0 20px; max-width: 800px; }
 .dashboard-header p:last-child { color: var(--muted); line-height: 1.6; }
