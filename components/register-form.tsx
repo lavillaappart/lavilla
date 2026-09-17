@@ -37,16 +37,6 @@ export default function RegisterForm() {
     setMessage(error ? error.message : 'Vérifiez votre adresse email pour activer votre compte.');
   };
 
-  const signUpWithGoogle = async () => {
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` }
-    });
-
-    if (error) setMessage(error.message);
-  };
-
   return (
     <div className="auth-stack">
       <form className="auth-form" onSubmit={handleSubmit}>
@@ -60,8 +50,6 @@ export default function RegisterForm() {
         <label>Mot de passe<input type="password" value={form.password} onChange={(event) => updateField('password', event.target.value)} required minLength={8} autoComplete="new-password" /></label>
         <button className="auth-submit" disabled={loading} type="submit">{loading ? 'Création...' : 'Créer mon compte'}</button>
       </form>
-      <div className="auth-divider"><span>ou</span></div>
-      <button className="auth-google" onClick={signUpWithGoogle} type="button">Continuer avec Google</button>
       {message ? <p className="auth-message" role="status">{message}</p> : null}
     </div>
   );
