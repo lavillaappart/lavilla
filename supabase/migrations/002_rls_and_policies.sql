@@ -43,9 +43,14 @@ CREATE POLICY "Users can read their own profile"
 ON public.profiles FOR SELECT
 USING (id = auth.uid());
 
+CREATE POLICY "Users can insert their own profile"
+ON public.profiles FOR INSERT
+WITH CHECK (id = auth.uid());
+
 CREATE POLICY "Users can update their own profile"
 ON public.profiles FOR UPDATE
-USING (id = auth.uid());
+USING (id = auth.uid())
+WITH CHECK (id = auth.uid());
 
 -- Roles and permissions: restricted to owner/admin
 CREATE POLICY "Admins can read roles"
@@ -115,7 +120,19 @@ USING (auth.uid() IS NOT NULL);
 
 CREATE POLICY "Authenticated users can insert customers"
 ON public.customers FOR INSERT
-WITH CHECK (auth.uid() IS NOT NULL OR true);
+WITH CHECK (
+  auth.uid() IS NOT NULL
+  AND email = (SELECT email FROM auth.users WHERE id = auth.uid())
+);
+
+CREATE POLICY "Authenticated users can update their own customer"
+ON public.customers FOR UPDATE
+USING (
+  email = (SELECT email FROM auth.users WHERE id = auth.uid())
+)
+WITH CHECK (
+  email = (SELECT email FROM auth.users WHERE id = auth.uid())
+);
 
 CREATE POLICY "Admins manage reservation requests"
 ON public.reservation_requests FOR ALL

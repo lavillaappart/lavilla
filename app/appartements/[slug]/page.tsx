@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createServerComponentClient } from '@/lib/supabase-server';
 import Brand from '@/components/brand';
+import ReservationRequestForm from '@/components/reservation-request-form';
 
 type Translation = {
   locale: 'es' | 'fr' | 'en';
@@ -47,7 +48,7 @@ export default async function AppartementPage({ params }: { params: { slug: stri
       <article className="apartment-public-detail">
         <div className="public-gallery">{images.length ? images.map((image, index) => <img className={index === 0 ? 'public-gallery-cover' : ''} key={image.storage_path} src={image.storage_path} alt={image.alt_text ?? translation?.name ?? apartment.slug} />) : <div className="public-image-placeholder">Photos bientôt disponibles</div>}</div>
         <div className="public-detail-copy">
-        <div className="public-kicker"><span className="eyebrow">La Villa · {apartment.city}</span><span className="availability-dot">Disponible</span></div>
+        <div className="public-kicker"><span className="eyebrow">La Villa Appart · {apartment.city}</span><span className="availability-dot">Disponible</span></div>
         <h1>{translation?.name ?? apartment.slug}</h1>
         <p className="public-lead">{translation?.description ?? translation?.short_description}</p>
         <p className="public-address">{translation?.location_text ?? apartment.address}</p>
@@ -70,8 +71,10 @@ export default async function AppartementPage({ params }: { params: { slug: stri
           </div>
         </dl>
         <div className="public-price"><span>À partir de</span><strong>{apartment.base_price} MAD</strong><small>par nuit · séjour minimum selon disponibilité</small></div>
-        <Link className="public-booking-cta" href="/registro">Demander ce séjour <span>↗</span></Link>
         <p className="public-hours">Arrivée à partir de {apartment.check_in_time ?? '15:00'} · Départ avant {apartment.check_out_time ?? '11:00'}</p>
+        <div className="booking-request-panel">
+          <ReservationRequestForm apartment={{ id: apartment.id, slug: apartment.slug, base_price: Number(apartment.base_price ?? 0), currency: apartment.currency ?? 'MAD', city: apartment.city }} />
+        </div>
         </div>
       </article></div>
     </main>

@@ -16,16 +16,77 @@ export default function ProfileCompletionForm({ initialValues }: { initialValues
     setMessage('');
     const supabase = createClient();
     const { data: userData } = await supabase.auth.getUser();
-    const { error } = await supabase.from('profiles').update({
-      full_name: form.fullName,
-      address: form.address,
-      country: form.country,
-      phone: form.phone,
-      whatsapp_phone: form.phone,
-      language: 'fr'
-    }).eq('id', userData.user?.id ?? '');
+
+    const userId = userData.user?.id ?? '';
+    const nameParts = form.fullName.trim().split(/\s+/).filter(Boolean);
+    const firstName = nameParts.shift() ?? '';
+    const lastName = nameParts.join(' ') ?? '';
+
+    let profileError = null as { message: string } | null;
+
+    if (userId) {
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (existingProfile) {
+        const { error } = await supabase.from('profiles').update({
+          full_name: form.fullName,
+          address: form.address,
+          country: form.country,
+          phone: form.phone,
+          whatsapp_phone: form.phone,
+          language: 'fr'
+        }).eq('id', userId);
+        profileError = error ? { message: error.message } : null;
+      } else {
+        const { error } = await supabase.from('profiles').insert({
+          id: userId,
+          email: userData.user?.email ?? '',
+          full_name: form.fullName,
+          address: form.address,
+          country: form.country,
+          phone: form.phone,
+          whatsapp_phone: form.phone,
+          language: 'fr',
+          status: 'active'
+        });
+        profileError = error ? { message: error.message } : null;
+      }
+    }
+
+    if (userId) {
+      const { data: customerData } = await supabase
+        .from('customers')
+        .select('id')
+        .eq('email', userData.user?.email ?? '')
+        .maybeSingle();
+
+      if (customerData?.id) {
+        await supabase.from('customers').update({
+          first_name: firstName,
+          last_name: lastName,
+          phone: form.phone,
+          country: form.country,
+          preferred_language: 'fr'
+        }).eq('id', customerData.id);
+      } else if (userData.user?.email) {
+        await supabase.from('customers').insert({
+          first_name: firstName || 'Client',
+          last_name: lastName || 'Client',
+          email: userData.user.email,
+          phone: form.phone,
+          country: form.country,
+          preferred_language: 'fr',
+          source: 'website'
+        });
+      }
+    }
+
     setLoading(false);
-    setMessage(error ? error.message : 'Profil complété. Vous pouvez maintenant demander une réservation.');
+    setMessage(profileError ? profileError.message : 'Profil complété. Vous pouvez maintenant demander une réservation.');
   };
 
   const update = (field: keyof ProfileValues, value: string) => setForm((current) => ({ ...current, [field]: value }));

@@ -3,7 +3,34 @@ import { notFound, redirect } from 'next/navigation';
 import { createServerComponentClient } from '@/lib/supabase-server';
 import SessionControls from '@/components/session-controls';
 import RequestActions from '@/components/request-actions';
+import DeleteReservationButton from '@/components/delete-reservation-button';
 import Brand from '@/components/brand';
+
+function parseProofLinks(value: unknown): string[] {
+  if (!value) return [];
+
+  if (Array.isArray(value)) {
+    return value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
+  }
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!trimmed) return [];
+
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) {
+        return parsed.filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
+      }
+    } catch {
+      // keep compatibility with old single-string proof_url values
+    }
+
+    return [trimmed];
+  }
+
+  return [];
+}
 
 const sections = {
   solicitudes: { title: 'Demandes de réservation', eyebrow: 'Demandes', description: 'Traitez les demandes reçues et contactez les voyageurs.', table: 'reservation_requests' },
@@ -47,7 +74,30 @@ export default async function AdminSectionPage({ params }: { params: { section: 
     <main className="dashboard-page">
       <nav className="dashboard-nav"><Brand href="/admin" admin /><div><Link href="/admin">Dashboard</Link><SessionControls isAuthenticated isAdmin /></div></nav>
       <header className="dashboard-header admin-page-header"><div><p className="eyebrow">{section.eyebrow} · {role?.slug}</p><h1>{section.title}</h1><p>{section.description}</p></div><Link className="admin-back-link" href="/admin">← Dashboard</Link></header>
-      {error ? <p className="dashboard-empty">Erreur Supabase: {error.message}</p> : rows.length === 0 ? <p className="dashboard-empty">Aucun élément à afficher pour le moment.</p> : <section className="admin-data-list">{rows.map((row, index) => <article className="admin-data-row" key={String(row.id ?? index)}><div><strong>{getPrimaryLabel(params.section, row)}</strong><small>{getSecondaryLabel(params.section, row)}</small></div><span>{getStatus(row)}</span><b>{getAmount(row)}</b>{params.section === 'solicitudes' ? <RequestActions requestId={String(row.id)} status={String(row.status ?? '')} /> : null}</article>)}</section>}
+      {error ? <p className="dashboard-empty">Erreur Supabase: {error.message}</p> : rows.length === 0 ? <p className="dashboard-empty">Aucun élément à afficher pour le moment.</p> : <section className="admin-data-list">{rows.map((row, index) => {
+      const proofLinks = params.section === 'pagos' ? parseProofLinks(row.proof_url) : [];
+      return (
+        <article className="admin-data-row" key={String(row.id ?? index)}>
+          <div>
+            <strong>{getPrimaryLabel(params.section, row)}</strong>
+            <small>{getSecondaryLabel(params.section, row)}</small>
+            {params.section === 'pagos' && proofLinks.length > 0 ? (
+              <div className="payment-proof-links admin">
+                {proofLinks.map((url, proofIndex) => (
+                  <a key={`${url}-${proofIndex}`} className="payment-proof-link admin" href={url} target="_blank" rel="noreferrer">
+                    Voir document {proofIndex + 1}
+                  </a>
+                ))}
+              </div>
+            ) : null}
+          </div>
+          <span>{getStatus(row)}</span>
+          <b>{getAmount(row)}</b>
+          {params.section === 'solicitudes' ? <RequestActions requestId={String(row.id)} status={String(row.status ?? '')} /> : null}
+          {params.section === 'solicitudes' || params.section === 'reservas' ? <DeleteReservationButton table={params.section === 'solicitudes' ? 'reservation_requests' : 'reservations'} rowId={String(row.id)} status={String(row.status ?? '')} /> : null}
+        </article>
+      );
+  })}</section>}
     </main>
   );
 }
@@ -66,7 +116,10 @@ function getSecondaryLabel(section: string, row: Record<string, unknown>) {
   if (section === 'llegadas') return `Arrivée: ${row.check_in ?? ''} · ${row.guests_count ?? 0} voyageurs`;
   if (section === 'salidas') return `Départ: ${row.check_out ?? ''} · ${row.guests_count ?? 0} voyageurs`;
   if (section === 'reservas') return `${row.check_in ?? ''} → ${row.check_out ?? ''} · ${row.guests_count ?? 0} voyageurs`;
-  if (section === 'pagos') return `${row.amount ?? 0} ${row.currency ?? 'MAD'} · ${row.payment_method ?? 'bank_transfer'}`;
+  if (section === 'pagos') {
+    const proofCount = parseProofLinks(row.proof_url).length;
+    return `${row.amount ?? 0} ${row.currency ?? 'MAD'} · ${row.payment_method ?? 'bank_transfer'}${proofCount > 0 ? ` · ${proofCount} document${proofCount > 1 ? 's' : ''}` : ''}`;
+  }
   if (section === 'ajustes') return String(row.description ?? '');
   return `${row.check_in ?? ''} → ${row.check_out ?? ''}`;
 }
