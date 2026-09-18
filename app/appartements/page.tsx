@@ -45,13 +45,29 @@ export default async function AppartementsPage() {
     const typedApartment = apartment as Apartment;
     return {
       ...typedApartment,
+      apartment_translations: Array.isArray(typedApartment.apartment_translations) ? typedApartment.apartment_translations : [],
       apartment_images: [...(typedApartment.apartment_images ?? [])].sort((a, b) => Number(b.is_primary) - Number(a.is_primary) || a.sort_order - b.sort_order)
     };
   });
 
   return (
     <main className="site-main">
-      <header className="listing-header"><div className="shell"><nav className="nav"><Brand /><div className="nav-links"><Link className="nav-cta" href="/">Retour à l&apos;accueil</Link></div></nav><p className="eyebrow">Nos adresses</p><h1>Choisissez votre prochain chez-vous.</h1><p>Des espaces singuliers pour vivre Valencia à votre rythme.</p></div></header>
+      <header className="main-header">
+        <div className="shell main-header-inner">
+          <nav className="nav">
+            <Brand />
+            <div className="nav-links">
+              <Link className="nav-cta" href="/">Retour à l&apos;accueil</Link>
+            </div>
+          </nav>
+        </div>
+      </header>
+
+      <section className="listing-intro shell">
+        <p className="eyebrow">Nos adresses</p>
+        <h1>Choisissez votre prochain chez-vous.</h1>
+        <p>Des espaces singuliers pour vivre Al Hoceima à votre rythme.</p>
+      </section>
 
       {apartments.length === 0 ? <section className="shell listing-grid"><p className="empty-state">Aucun appartement disponible pour le moment.</p></section> : (
         <section className="shell listing-grid" aria-label="Liste des appartements">
@@ -67,7 +83,7 @@ export default async function AppartementsPage() {
           })}
         </section>
       )}
-      <footer className="footer"><div className="shell footer-inner"><span>© 2026 La Villa</span><Link href="/">Accueil ↗</Link></div></footer>
+      <footer className="footer"><div className="shell footer-inner"><span>© 2026 La Villa Appart</span><Link href="/">Accueil ↗</Link></div></footer>
     </main>
   );
 }

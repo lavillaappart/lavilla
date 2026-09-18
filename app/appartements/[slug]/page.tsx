@@ -37,7 +37,8 @@ export default async function AppartementPage({ params }: { params: { slug: stri
   }
 
   const apartment = data as typeof data & { apartment_translations: Translation[]; apartment_images: ApartmentImage[] };
-  const translation = getTranslation(apartment.apartment_translations);
+  const safeTranslations = Array.isArray(apartment.apartment_translations) ? apartment.apartment_translations : [];
+  const translation = getTranslation(safeTranslations);
   const images = [...(apartment.apartment_images ?? [])].sort((a, b) => Number(b.is_primary) - Number(a.is_primary) || a.sort_order - b.sort_order);
 
   return (
