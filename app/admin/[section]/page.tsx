@@ -127,7 +127,6 @@ export default async function AdminSectionPage({ params }: { params: { section: 
           <span>{getStatus(row)}</span>
           <b>{getAmount(row)}</b>
           {params.section === 'solicitudes' ? <RequestActions requestId={String(row.id)} status={String(row.status ?? '')} defaultNotes={String(row.special_requests ?? '')} /> : null}
-          {params.section === 'solicitudes' || params.section === 'reservas' ? <DeleteReservationButton table={params.section === 'solicitudes' ? 'reservation_requests' : 'reservations'} rowId={String(row.id)} status={String(row.status ?? '')} /> : null}
         </article>
       );
   })}</section>}
