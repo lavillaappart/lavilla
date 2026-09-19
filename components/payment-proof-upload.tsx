@@ -172,7 +172,7 @@ export default function PaymentProofUpload({ requestId, amount, currency, paymen
     }
   };
 
-  if (!['awaiting_payment', 'payment_received'].includes(status)) return null;
+  if (['cancelled', 'rejected', 'expired'].includes(status)) return null;
 
   return (
     <div className="payment-proof-upload">
