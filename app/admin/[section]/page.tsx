@@ -32,6 +32,18 @@ function parseProofLinks(value: unknown): string[] {
   return [];
 }
 
+function parseRequiredDocuments(value: unknown): string[] {
+  if (typeof value !== 'string' || !value.trim()) {
+    return [];
+  }
+
+  return value
+    .split(/\n|\r|\||;/)
+    .map((item) => item.replace(/^[-•*\s]+/, '').trim())
+    .filter((item) => item.length > 0)
+    .slice(0, 10);
+}
+
 const sections = {
   solicitudes: { title: 'Demandes de réservation', eyebrow: 'Demandes', description: 'Traitez les demandes reçues et contactez les voyageurs.', table: 'reservation_requests' },
   reservas: { title: 'Réservations', eyebrow: 'Réservations', description: 'Consultez les séjours confirmés et leur état.', table: 'reservations' },
@@ -76,11 +88,20 @@ export default async function AdminSectionPage({ params }: { params: { section: 
       <header className="dashboard-header admin-page-header"><div><p className="eyebrow">{section.eyebrow} · {role?.slug}</p><h1>{section.title}</h1><p>{section.description}</p></div><Link className="admin-back-link" href="/admin">← Dashboard</Link></header>
       {error ? <p className="dashboard-empty">Erreur Supabase: {error.message}</p> : rows.length === 0 ? <p className="dashboard-empty">Aucun élément à afficher pour le moment.</p> : <section className="admin-data-list">{rows.map((row, index) => {
       const proofLinks = params.section === 'pagos' ? parseProofLinks(row.proof_url) : [];
+      const requiredDocuments = params.section === 'solicitudes' ? parseRequiredDocuments(row.special_requests) : [];
       return (
         <article className="admin-data-row" key={String(row.id ?? index)}>
           <div>
             <strong>{getPrimaryLabel(params.section, row)}</strong>
             <small>{getSecondaryLabel(params.section, row)}</small>
+            {params.section === 'solicitudes' && requiredDocuments.length > 0 ? (
+              <div className="admin-doc-list">
+                <span>Documents requis</span>
+                <ul>
+                  {requiredDocuments.map((doc) => <li key={doc}>{doc}</li>)}
+                </ul>
+              </div>
+            ) : null}
             {params.section === 'pagos' && proofLinks.length > 0 ? (
               <div className="payment-proof-links admin">
                 {proofLinks.map((url, proofIndex) => (

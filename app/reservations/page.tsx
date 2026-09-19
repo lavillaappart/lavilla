@@ -53,14 +53,14 @@ function statusLabel(status: string) {
   return map[status] ?? status;
 }
 
-function requiredDocuments(status: string) {
-  if (!['confirmed', 'payment_received', 'awaiting_payment'].includes(status)) return [];
-  return [
-    'CIN / passeport',
-    'Preuve de paiement',
-    'Acte de mariage si applicable',
-    'Informations supplémentaires demandées par l’hôtel'
-  ];
+function requiredDocuments(extraDetails?: string | null) {
+  if (!extraDetails || !extraDetails.trim()) return [];
+
+  return extraDetails
+    .split(/\n|\r|\||;/)
+    .map((item) => item.replace(/^[-•*\s]+/, '').trim())
+    .filter((item) => item.length > 0)
+    .slice(0, 10);
 }
 
 function buildWhatsAppUrl(number: string, reservation: { apartmentName?: string; check_in: string; check_out: string; status?: string }) {
@@ -157,7 +157,7 @@ export default async function ReservationsPage() {
                 : 'Paiement à l’arrivée · Total à régler sur place';
 
             const notesText = reservation.special_requests || reservation.notes || 'Aucune demande particulière.';
-            const docs = requiredDocuments(reservation.status);
+            const docs = requiredDocuments(reservation.special_requests || reservation.notes);
             const whatsappUrl = buildWhatsAppUrl(whatsappNumber, { apartmentName: apartment.slug ?? 'Appartement', check_in: reservation.check_in, check_out: reservation.check_out, status: reservation.status });
             const requestId = reservation.source === 'reservation' ? (reservation.request_id ?? reservation.id) : reservation.id;
             const reservationId = reservation.source === 'reservation' ? reservation.id : null;
