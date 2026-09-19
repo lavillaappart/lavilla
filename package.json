@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:clean": "powershell -ExecutionPolicy Bypass -Command \"$procs = Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'node|next' } | Select-Object -ExpandProperty ProcessId -Unique; foreach ($id in $procs) { Stop-Process -Id $id -Force -ErrorAction SilentlyContinue }; Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue; next dev -p 3000\"",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

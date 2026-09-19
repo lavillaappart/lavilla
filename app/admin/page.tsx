@@ -37,9 +37,10 @@ export default async function AdminPage() {
   nextWeek.setDate(today.getDate() + 7);
   const nextWeekValue = nextWeek.toISOString().slice(0, 10);
 
-  const [pendingRequests, confirmedReservations, upcomingArrivals, upcomingDepartures, pendingPayments, activeApartments, occupiedApartments] = await Promise.all([
+  const [pendingRequests, confirmedReservations, cancelledReservations, upcomingArrivals, upcomingDepartures, pendingPayments, activeApartments, occupiedApartments] = await Promise.all([
     supabase.from('reservation_requests').select('id', { count: 'exact', head: true }).in('status', ['pending', 'contacted', 'awaiting_payment']),
     supabase.from('reservations').select('id', { count: 'exact', head: true }).eq('status', 'confirmed'),
+    supabase.from('reservation_requests').select('id', { count: 'exact', head: true }).eq('status', 'cancelled'),
     supabase.from('reservations').select('id', { count: 'exact', head: true }).eq('status', 'confirmed').gte('check_in', todayValue).lte('check_in', nextWeekValue),
     supabase.from('reservations').select('id', { count: 'exact', head: true }).eq('status', 'confirmed').gte('check_out', todayValue).lte('check_out', nextWeekValue),
     supabase.from('payments').select('id', { count: 'exact', head: true }).in('status', ['pending', 'proof_received']),
@@ -57,12 +58,33 @@ export default async function AdminPage() {
       <section className="dashboard-grid">
         <DashboardCard label="Demandes en attente" value={pendingRequests.count ?? 0} href="/admin/solicitudes" />
         <DashboardCard label="Réservations confirmées" value={confirmedReservations.count ?? 0} href="/admin/reservas" />
+        <DashboardCard label="Réservations annulées" value={cancelledReservations.count ?? 0} href="/admin/anuladas" />
         <DashboardCard label="Paiements à vérifier" value={pendingPayments.count ?? 0} href="/admin/pagos" />
         <DashboardCard label="Arrivées · 7 jours" value={upcomingArrivals.count ?? 0} href="/admin/llegadas" />
         <DashboardCard label="Départs · 7 jours" value={upcomingDepartures.count ?? 0} href="/admin/salidas" />
         <DashboardCard label="Appartements disponibles" value={Math.max(activeCount - occupiedIds.size, 0)} href="/admin/apartamentos" />
       </section>
-      <section className="admin-tools"><div className="admin-section-heading"><div><p className="eyebrow">Gestion</p><h2>Outils d&apos;administration</h2></div><Link href="/admin/calendario">Ouvrir le calendrier ↗</Link></div><div className="tool-grid"><AdminTool href="/admin/calendario" title="Calendrier" description="Disponibilité, réservations et blocages." icon="▦" /><AdminTool href="/admin/llegadas" title="Prochaines arrivées" description="Clients, horaires et paiements." icon="↓" /><AdminTool href="/admin/salidas" title="Prochains départs" description="Sorties et notes opérationnelles." icon="↑" /><AdminTool href="/admin/solicitudes" title="Demandes" description="Traiter les nouvelles demandes." icon="○" /><AdminTool href="/admin/reservas" title="Réservations" description="Réservations confirmées et annulées." icon="□" /><AdminTool href="/admin/clientes" title="Clients" description="Fiches et historique client." icon="◌" /><AdminTool href="/admin/apartamentos" title="Appartements" description="Propriétés, photos et tarifs." icon="⌂" /><AdminTool href="/admin/pagos" title="Paiements" description="Justificatifs et vérifications." icon="€" /><AdminTool href="/admin/ajustes" title="Configuration" description="Banca, idiomas y reglas del sistema." icon="⚙" /></div></section>
+      <section className="admin-tools">
+        <div className="admin-section-heading">
+          <div>
+            <p className="eyebrow">Gestion</p>
+            <h2>Outils d&apos;administration</h2>
+          </div>
+          <Link href="/admin/calendario">Ouvrir le calendrier ↗</Link>
+        </div>
+        <div className="tool-grid">
+          <AdminTool href="/admin/calendario" title="Calendrier" description="Disponibilité, réservations et blocages." icon="▦" />
+          <AdminTool href="/admin/llegadas" title="Prochaines arrivées" description="Clients, horaires et paiements." icon="↓" />
+          <AdminTool href="/admin/salidas" title="Prochains départs" description="Sorties et notes opérationnelles." icon="↑" />
+          <AdminTool href="/admin/solicitudes" title="Demandes" description="Traiter les nouvelles demandes." icon="○" />
+          <AdminTool href="/admin/reservas" title="Réservations" description="Réservations confirmées." icon="□" />
+          <AdminTool href="/admin/anuladas" title="Annulées" description="Historique et motifs d’annulation." icon="✕" />
+          <AdminTool href="/admin/clientes" title="Clients" description="Fiches et historique client." icon="◌" />
+          <AdminTool href="/admin/apartamentos" title="Appartements" description="Propriétés, photos et tarifs." icon="⌂" />
+          <AdminTool href="/admin/pagos" title="Paiements" description="Justificatifs et vérifications." icon="€" />
+          <AdminTool href="/admin/ajustes" title="Configuration" description="Banca, idiomas y reglas del sistema." icon="⚙" />
+        </div>
+      </section>
     </main>
   );
 }

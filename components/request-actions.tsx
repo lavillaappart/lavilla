@@ -7,6 +7,7 @@ export default function RequestActions({ requestId, status, defaultNotes = '' }:
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [notes, setNotes] = useState(defaultNotes);
+  const [cancelReason, setCancelReason] = useState('');
 
   const saveRequirements = async () => {
     setLoading(true);
@@ -32,6 +33,7 @@ export default function RequestActions({ requestId, status, defaultNotes = '' }:
     setLoading(true);
     setMessage('');
     const supabase = createClient();
+    const cancellationReason = (cancelReason || notes || 'Reserva anulada por el administrador.').trim();
 
     const { data: requestData, error: requestFetchError } = await supabase
       .from('reservation_requests')
@@ -53,7 +55,8 @@ export default function RequestActions({ requestId, status, defaultNotes = '' }:
 
     const updatePayload: Record<string, unknown> = {
       status: nextStatus,
-      last_contacted_at: nextStatus === 'contacted' ? new Date().toISOString() : null
+      last_contacted_at: nextStatus === 'contacted' ? new Date().toISOString() : null,
+      contact_notes: nextStatus === 'cancelled' ? cancellationReason : notes.trim() || null
     };
 
     const { error: requestUpdateError } = await supabase
@@ -102,11 +105,22 @@ export default function RequestActions({ requestId, status, defaultNotes = '' }:
     }
 
     if (nextStatus === 'cancelled') {
+      const cancelledAt = new Date().toISOString();
+      await supabase
+        .from('reservation_requests')
+        .update({
+          status: 'cancelled',
+          contact_notes: cancellationReason,
+          last_contacted_at: cancelledAt
+        })
+        .eq('id', requestData.id);
+
       await supabase
         .from('reservations')
         .update({
           status: 'cancelled',
-          cancelled_at: new Date().toISOString()
+          cancelled_at: cancelledAt,
+          notes: cancellationReason
         })
         .eq('request_id', requestData.id);
     }
@@ -126,6 +140,15 @@ export default function RequestActions({ requestId, status, defaultNotes = '' }:
           value={notes}
         />
         <button className="secondary-action" disabled={loading} onClick={saveRequirements} type="button">Enregistrer</button>
+      </div>
+      <div className="admin-cancel-box">
+        <label htmlFor={`cancel-reason-${requestId}`}>Note d’annulation</label>
+        <textarea
+          id={`cancel-reason-${requestId}`}
+          onChange={(event) => setCancelReason(event.target.value)}
+          placeholder="Ex. Client a annulé pour raison personnelle."
+          value={cancelReason}
+        />
       </div>
       <div className="request-action-buttons">
         <button disabled={loading || status === 'confirmed'} onClick={() => changeStatus('confirmed')} type="button">Accepter</button>
