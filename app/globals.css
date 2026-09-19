@@ -155,7 +155,7 @@ button, input { font: inherit; }
 .client-panel-links { display: grid; gap: 8px; margin-bottom: 26px; }
 .client-panel-links a { align-items: center; background: var(--sage); display: flex; font-size: 14px; font-weight: 700; justify-content: space-between; padding: 16px; }
 .dashboard-page { background: linear-gradient(180deg, rgba(240, 236, 227, 0.8) 0%, var(--paper) 18%, var(--paper) 100%); min-height: 100vh; padding: 0 max(20px, calc((100vw - 1180px) / 2)); }
-.dashboard-nav { align-items: center; display: flex; justify-content: space-between; padding: 24px 0; }
+.dashboard-nav { align-items: center; display: flex; justify-content: space-between; gap: 14px; padding: 24px 0; }
 .dashboard-nav a { color: var(--muted); font-size: 14px; margin-left: 22px; }
 .dashboard-nav .brand { color: var(--ink); margin-left: 0; }
 .dashboard-nav .brand-mark { background: var(--forest); }
@@ -874,13 +874,16 @@ button, input { font: inherit; }
   .account-bar { padding-top: 8px; }
   .session-controls { flex-wrap: wrap; }
   .session-link, .session-button { font-size: 11px; padding: 9px 11px; }
+  .nav { flex-wrap: wrap; gap: 12px; }
+  .nav-links { gap: 12px; margin-left: 0; width: 100%; justify-content: flex-start; }
   .nav-links a:not(.nav-cta) { display: none; }
-  .hero { min-height: 680px; }
-  .hero-image { inset: 0 0 76px; }
-  .hero-content { padding: 90px 25px 150px; }
+  .nav-cta { padding: 10px 14px; }
+  .hero { min-height: auto; padding-bottom: 18px; }
+  .hero-image { inset: 0 0 120px; }
+  .hero-content { padding: 90px 20px 170px; }
   .hero h1 { font-size: clamp(3.1rem, 15vw, 5rem); }
-  .search-panel { bottom: 0; display: block; left: 14px; right: 14px; }
-  .search-field { border-bottom: 1px solid var(--line); border-right: 0; }
+  .search-panel { bottom: 18px; display: block; left: 14px; right: 14px; position: absolute; }
+  .search-field { border-bottom: 1px solid var(--line); border-right: 0; padding: 12px 16px; }
   .search-button { margin-top: 8px; width: 100%; }
   .section { padding: 72px 0; }
   .section-heading { align-items: flex-start; display: block; }
@@ -888,4 +891,27 @@ button, input { font: inherit; }
   .feature-grid, .listing-grid, .story-grid { grid-template-columns: 1fr; }
   .story-grid { gap: 45px; }
   .footer-inner { align-items: flex-start; flex-direction: column; gap: 15px; }
+  .dashboard-nav { align-items: flex-start; flex-wrap: wrap; }
+  .dashboard-nav div { display: flex; flex-wrap: wrap; gap: 8px; }
+  .dashboard-nav a { margin-left: 0; }
+  .dashboard-header-compact { align-items: flex-start; display: block; }
+  .dashboard-header-compact time { display: block; margin-top: 18px; }
+  .dashboard-grid, .tool-grid, .admin-apartment-layout, .admin-data-row, .reservation-detail-grid { grid-template-columns: 1fr; }
+  .admin-section-heading, .admin-page-header { align-items: flex-start; display: block; }
+  .admin-section-heading > a, .admin-back-link { display: inline-block; margin-top: 15px; }
+  .reservation-row {
+    border-left-width: 2px;
+    gap: 16px;
+    grid-template-columns: 1fr;
+    padding: 20px 18px;
+  }
+  .reservation-row h2 {
+    font-size: clamp(1.7rem, 8vw, 2.6rem);
+  }
+  .reservation-meta-block strong {
+    font-size: 2rem;
+  }
+  .reservation-docs {
+    padding: 14px 15px;
+  }
 }
