@@ -20,12 +20,6 @@ const paymentLabels: Record<string, string> = {
   on_arrival: 'Payer à l’arrivée'
 };
 
-const requiredDocumentOptions = [
-  'CIN / passeport',
-  'Preuve de paiement',
-  'Acte de mariage si applicable'
-];
-
 export default function ReservationRequestForm({ apartment }: ReservationRequestFormProps) {
   const router = useRouter();
   const [form, setForm] = useState({
@@ -34,8 +28,7 @@ export default function ReservationRequestForm({ apartment }: ReservationRequest
     guests: 2,
     paymentMethod: 'bank_transfer',
     paymentAmount: '',
-    specialRequests: '',
-    requiredDocuments: [] as string[]
+    specialRequests: ''
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -135,10 +128,6 @@ export default function ReservationRequestForm({ apartment }: ReservationRequest
       ? Number(form.paymentAmount || suggestedDeposit || 0)
       : null;
 
-    const requiredDocumentSummary = form.requiredDocuments
-      .concat(form.specialRequests.trim() ? [`Autre demande : ${form.specialRequests.trim()}`] : [])
-      .join('\n');
-
     const { data: insertedRequest, error: requestError } = await supabase.from('reservation_requests').insert({
       apartment_id: apartment.id,
       customer_id: customerId,
@@ -146,7 +135,7 @@ export default function ReservationRequestForm({ apartment }: ReservationRequest
       check_out: form.checkOut,
       guests_count: Number(form.guests),
       status: 'pending',
-      special_requests: requiredDocumentSummary || null,
+      special_requests: form.specialRequests.trim() || null,
       privacy_accepted: true,
       source: 'website',
       payment_method: paymentMethod,
@@ -214,39 +203,14 @@ export default function ReservationRequestForm({ apartment }: ReservationRequest
         </label>
       ) : null}
 
-      <div className="document-requirement-block">
-        <p className="eyebrow">Documents requis</p>
-        <div className="required-document-options">
-          {requiredDocumentOptions.map((option) => (
-            <label className="required-document-option" key={option}>
-              <input
-                checked={form.requiredDocuments.includes(option)}
-                onChange={() => {
-                  const nextDocuments = form.requiredDocuments.includes(option)
-                    ? form.requiredDocuments.filter((item) => item !== option)
-                    : [...form.requiredDocuments, option];
-                  updateField('requiredDocuments', nextDocuments);
-                }}
-                type="checkbox"
-              />
-              <span>{option}</span>
-            </label>
-          ))}
-        </div>
-
-        {form.requiredDocuments.length === 0 && !form.specialRequests.trim() ? (
-          <small className="document-empty-note">Aucun document requis — la réservation peut être acceptée sans exigence complémentaire.</small>
-        ) : null}
-
-        <label className="custom-requirement-field">
-          Demande supplémentaire
-          <textarea
-            onChange={(event) => updateField('specialRequests', event.target.value)}
-            placeholder="Si besoin d’un document supplémentaire, précisez-le ici."
-            value={form.specialRequests}
-          />
-        </label>
-      </div>
+      <label>
+        Demande particulière
+        <textarea
+          onChange={(event) => updateField('specialRequests', event.target.value)}
+          placeholder="Ex. : arrivée tardive, bébé, demande spéciale, etc."
+          value={form.specialRequests}
+        />
+      </label>
 
       <div className="booking-summary-box">
         <span>{nights} nuit{nights > 1 ? 's' : ''}</span>

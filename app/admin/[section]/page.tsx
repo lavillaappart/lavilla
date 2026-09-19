@@ -74,6 +74,7 @@ export default async function AdminSectionPage({ params }: { params: { section: 
   const nextWeek = nextWeekDate.toISOString().slice(0, 10);
   let query = supabase.from(section.table).select('*').order(params.section === 'ajustes' ? 'updated_at' : 'created_at', { ascending: false }).limit(50);
 
+  if (params.section === 'solicitudes') query = supabase.from('reservation_requests').select('*, customers(first_name, last_name, email, phone)').order('created_at', { ascending: false }).limit(50);
   if (params.section === 'llegadas') query = supabase.from('reservations').select('*').eq('status', 'confirmed').gte('check_in', today).lte('check_in', nextWeek).order('check_in');
   if (params.section === 'salidas') query = supabase.from('reservations').select('*').eq('status', 'confirmed').gte('check_out', today).lte('check_out', nextWeek).order('check_out');
   if (params.section === 'reservas') query = supabase.from('reservations').select('*').order('check_in');
@@ -89,11 +90,22 @@ export default async function AdminSectionPage({ params }: { params: { section: 
       {error ? <p className="dashboard-empty">Erreur Supabase: {error.message}</p> : rows.length === 0 ? <p className="dashboard-empty">Aucun élément à afficher pour le moment.</p> : <section className="admin-data-list">{rows.map((row, index) => {
       const proofLinks = params.section === 'pagos' ? parseProofLinks(row.proof_url) : [];
       const requiredDocuments = params.section === 'solicitudes' ? parseRequiredDocuments(row.special_requests) : [];
+      const customer = params.section === 'solicitudes' && row.customers ? (row.customers as Record<string, unknown>) : null;
+      const customerName = customer ? `${String(customer.first_name ?? '')} ${String(customer.last_name ?? '')}`.trim() || 'Client' : 'Client';
+      const customerPhone = customer?.phone ? String(customer.phone) : 'No phone';
+      const customerEmail = customer?.email ? String(customer.email) : 'No email';
       return (
         <article className="admin-data-row" key={String(row.id ?? index)}>
           <div>
             <strong>{getPrimaryLabel(params.section, row)}</strong>
             <small>{getSecondaryLabel(params.section, row)}</small>
+            {params.section === 'solicitudes' ? (
+              <div className="admin-customer-meta">
+                <span>{customerName}</span>
+                <span>{customerPhone}</span>
+                <span>{customerEmail}</span>
+              </div>
+            ) : null}
             {params.section === 'solicitudes' && requiredDocuments.length > 0 ? (
               <div className="admin-doc-list">
                 <span>Documents requis</span>
@@ -114,7 +126,7 @@ export default async function AdminSectionPage({ params }: { params: { section: 
           </div>
           <span>{getStatus(row)}</span>
           <b>{getAmount(row)}</b>
-          {params.section === 'solicitudes' ? <RequestActions requestId={String(row.id)} status={String(row.status ?? '')} /> : null}
+          {params.section === 'solicitudes' ? <RequestActions requestId={String(row.id)} status={String(row.status ?? '')} defaultNotes={String(row.special_requests ?? '')} /> : null}
           {params.section === 'solicitudes' || params.section === 'reservas' ? <DeleteReservationButton table={params.section === 'solicitudes' ? 'reservation_requests' : 'reservations'} rowId={String(row.id)} status={String(row.status ?? '')} /> : null}
         </article>
       );

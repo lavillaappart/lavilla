@@ -3,9 +3,30 @@
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase-client';
 
-export default function RequestActions({ requestId, status }: { requestId: string; status: string }) {
+export default function RequestActions({ requestId, status, defaultNotes = '' }: { requestId: string; status: string; defaultNotes?: string }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [notes, setNotes] = useState(defaultNotes);
+
+  const saveRequirements = async () => {
+    setLoading(true);
+    setMessage('');
+    const supabase = createClient();
+
+    const { error } = await supabase
+      .from('reservation_requests')
+      .update({ special_requests: notes.trim() || null })
+      .eq('id', requestId);
+
+    setLoading(false);
+
+    if (error) {
+      setMessage(error.message);
+      return;
+    }
+
+    setMessage('Documents requis enregistrés.');
+  };
 
   const changeStatus = async (nextStatus: string) => {
     setLoading(true);
@@ -96,11 +117,23 @@ export default function RequestActions({ requestId, status }: { requestId: strin
 
   return (
     <div className="request-actions">
-      <button disabled={loading || status === 'confirmed'} onClick={() => changeStatus('confirmed')} type="button">Accepter</button>
-      <button disabled={loading || status === 'contacted'} onClick={() => changeStatus('contacted')} type="button">Contacter</button>
-      <button disabled={loading || status === 'awaiting_payment'} onClick={() => changeStatus('awaiting_payment')} type="button">Demander paiement</button>
-      <button disabled={loading || status === 'rejected'} onClick={() => changeStatus('rejected')} type="button">Refuser</button>
-      {status !== 'cancelled' ? <button className="danger" disabled={loading} onClick={() => changeStatus('cancelled')} type="button">Annuler</button> : null}
+      <div className="admin-requirements-box">
+        <label htmlFor={`requirements-${requestId}`}>Documents requis</label>
+        <textarea
+          id={`requirements-${requestId}`}
+          onChange={(event) => setNotes(event.target.value)}
+          placeholder="CIN / passeport\nPreuve de paiement\nActe de mariage si applicable"
+          value={notes}
+        />
+        <button className="secondary-action" disabled={loading} onClick={saveRequirements} type="button">Enregistrer</button>
+      </div>
+      <div className="request-action-buttons">
+        <button disabled={loading || status === 'confirmed'} onClick={() => changeStatus('confirmed')} type="button">Accepter</button>
+        <button disabled={loading || status === 'contacted'} onClick={() => changeStatus('contacted')} type="button">Contacter</button>
+        <button disabled={loading || status === 'awaiting_payment'} onClick={() => changeStatus('awaiting_payment')} type="button">Demander paiement</button>
+        <button disabled={loading || status === 'rejected'} onClick={() => changeStatus('rejected')} type="button">Refuser</button>
+        {status !== 'cancelled' ? <button className="danger" disabled={loading} onClick={() => changeStatus('cancelled')} type="button">Annuler</button> : null}
+      </div>
       {message ? <small>{message}</small> : null}
     </div>
   );
