@@ -65,7 +65,18 @@ export default function PaymentProofUpload({ requestId, amount, currency, paymen
   }, [requestId]);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setSelectedFiles(Array.from(event.target.files ?? []));
+    const incoming = Array.from(event.target.files ?? []);
+    setSelectedFiles((previous) => {
+      const next = [...previous];
+      for (const file of incoming) {
+        const duplicate = next.some(
+          (item) => item.name === file.name && item.size === file.size && item.lastModified === file.lastModified
+        );
+        if (!duplicate) next.push(file);
+      }
+      return next;
+    });
+    event.target.value = '';
   };
 
   const handleUpload = async () => {
@@ -165,12 +176,39 @@ export default function PaymentProofUpload({ requestId, amount, currency, paymen
 
   return (
     <div className="payment-proof-upload">
-      <label className="payment-proof-label">Justificatif de paiement et documents complémentaires</label>
-      <input type="file" accept="image/*,.pdf" multiple capture="environment" onChange={handleFileChange} />
-      <small className="payment-proof-hint">Vous pouvez choisir un fichier ou prendre une photo / scanner avec votre téléphone.</small>
+      <label className="payment-proof-label">Justificatif de paiement + documents complémentaires</label>
+
+      <div className="payment-proof-selector">
+        <input
+          type="file"
+          accept="image/*,.pdf"
+          multiple
+          capture="environment"
+          onChange={handleFileChange}
+          aria-label="Ajouter des documents ou photos"
+        />
+      </div>
+
+      <small className="payment-proof-hint">
+        {selectedFiles.length > 0
+          ? `${selectedFiles.length} document${selectedFiles.length > 1 ? 's' : ''} prêt${selectedFiles.length > 1 ? 's' : ''} à envoyer.`
+          : 'Choisissez plusieurs fichiers ou prenez plusieurs photos depuis votre mobile.'}
+      </small>
+
+      {selectedFiles.length > 0 ? (
+        <div className="payment-proof-file-list">
+          {selectedFiles.map((file, index) => (
+            <span key={`${file.name}-${file.lastModified}-${index}`} className="payment-proof-file-pill">
+              {file.name.length > 28 ? `${file.name.slice(0, 25)}...` : file.name}
+            </span>
+          ))}
+        </div>
+      ) : null}
+
       <button className="payment-proof-button" disabled={uploading || !selectedFiles.length} onClick={handleUpload} type="button">
         {uploading ? 'Envoi...' : 'Envoyer les documents'}
       </button>
+
       {existingUrls.length > 0 ? (
         <div className="payment-proof-links">
           {existingUrls.map((url, index) => (

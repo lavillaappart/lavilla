@@ -359,7 +359,7 @@ button, input { font: inherit; }
 }
 .payment-proof-upload {
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 .payment-proof-label {
   color: var(--muted);
@@ -368,39 +368,105 @@ button, input { font: inherit; }
   letter-spacing: .08em;
   text-transform: uppercase;
 }
-.payment-proof-upload input[type='file'] {
+.payment-proof-selector {
+  background: rgba(255, 255, 255, 0.78);
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.6);
+  border-radius: 14px;
+  overflow: hidden;
+  padding: 10px 12px;
+  width: 100%;
+}
+.payment-proof-upload input[type='file'] {
+  background: transparent;
+  border: 0;
   color: var(--ink);
-  padding: 10px;
+  display: block;
+  font-size: 13px;
+  line-height: 1.5;
+  min-height: 48px;
+  padding: 4px 0;
+  width: 100%;
+}
+.payment-proof-upload input[type='file']::file-selector-button {
+  background: var(--forest);
+  border: 0;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  margin-right: 10px;
+  padding: 9px 12px;
+  text-transform: uppercase;
+}
+.payment-proof-hint {
+  color: var(--muted);
+  display: block;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.payment-proof-file-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.payment-proof-file-pill {
+  background: rgba(37, 67, 61, 0.08);
+  border: 1px solid rgba(37, 67, 61, 0.12);
+  border-radius: 999px;
+  color: var(--forest);
+  display: inline-flex;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
+  max-width: 100%;
+  padding: 7px 10px;
 }
 .payment-proof-button {
   background: var(--forest);
   border: 0;
+  border-radius: 12px;
   color: white;
   cursor: pointer;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: .04em;
-  padding: 10px 12px;
+  padding: 12px 14px;
   text-transform: uppercase;
 }
 .payment-proof-button:disabled {
   opacity: .55;
   cursor: wait;
 }
+.payment-proof-links {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 .payment-proof-link, .payment-proof-link.admin {
   color: var(--forest);
   display: inline-block;
   font-size: 12px;
   font-weight: 700;
-  margin-top: 4px;
 }
 .payment-proof-message {
   color: var(--forest);
   display: block;
   font-size: 11px;
   line-height: 1.5;
+}
+@media (max-width: 640px) {
+  .payment-proof-selector {
+    padding: 8px 10px;
+  }
+  .payment-proof-upload input[type='file'] {
+    font-size: 12px;
+    min-height: 44px;
+  }
+  .payment-proof-button {
+    width: 100%;
+  }
 }
 
 .reservation-detail-page .dashboard-header { padding-bottom: 30px; }
